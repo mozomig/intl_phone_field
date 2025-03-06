@@ -44,6 +44,7 @@ class CountryPickerDialog extends StatefulWidget {
   final ValueChanged<Country> onCountryChanged;
   final String searchText;
   final List<Country> filteredCountries;
+  final List<Country> preferredCountries;
   final PickerDialogStyle? style;
   final String languageCode;
 
@@ -55,6 +56,7 @@ class CountryPickerDialog extends StatefulWidget {
     required this.onCountryChanged,
     required this.selectedCountry,
     required this.filteredCountries,
+    required this.preferredCountries,
     this.style,
   }) : super(key: key);
 
@@ -70,9 +72,18 @@ class _CountryPickerDialogState extends State<CountryPickerDialog> {
   void initState() {
     _selectedCountry = widget.selectedCountry;
     _filteredCountries = widget.filteredCountries.toList()
-      ..sort(
-        (a, b) => a.localizedName(widget.languageCode).compareTo(b.localizedName(widget.languageCode)),
-      );
+      ..sort((a, b) {
+        final aIndex = widget.preferredCountries.indexOf(a);
+        final bIndex = widget.preferredCountries.indexOf(b);
+
+        if (aIndex != -1 && bIndex != -1) {
+          return aIndex.compareTo(bIndex);
+        }
+        if (aIndex != -1) return -1;
+        if (bIndex != -1) return 1;
+
+        return a.localizedName(widget.languageCode).compareTo(b.localizedName(widget.languageCode));
+      });
 
     super.initState();
   }
@@ -105,9 +116,18 @@ class _CountryPickerDialogState extends State<CountryPickerDialog> {
                     ),
                 onChanged: (value) {
                   _filteredCountries = widget.countryList.stringSearch(value)
-                    ..sort(
-                      (a, b) => a.localizedName(widget.languageCode).compareTo(b.localizedName(widget.languageCode)),
-                    );
+                    ..sort((a, b) {
+                      final aIndex = widget.preferredCountries.indexOf(a);
+                      final bIndex = widget.preferredCountries.indexOf(b);
+
+                      if (aIndex != -1 && bIndex != -1) {
+                        return aIndex.compareTo(bIndex);
+                      }
+                      if (aIndex != -1) return -1;
+                      if (bIndex != -1) return 1;
+
+                      return a.localizedName(widget.languageCode).compareTo(b.localizedName(widget.languageCode));
+                    });
                   if (mounted) setState(() {});
                 },
               ),
